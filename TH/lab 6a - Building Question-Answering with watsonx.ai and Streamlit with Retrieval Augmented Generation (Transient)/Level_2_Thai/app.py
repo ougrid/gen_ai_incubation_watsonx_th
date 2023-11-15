@@ -15,6 +15,7 @@ from langchain.embeddings import (HuggingFaceHubEmbeddings,
                                   HuggingFaceInstructEmbeddings)
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain.vectorstores import FAISS, Chroma
+from langchain.prompts import PromptTemplate
 from PIL import Image
 from googletrans import Translator
 import requests
@@ -128,7 +129,7 @@ def translate_to_thai(sentence: str, choice: bool) -> str:
         raise ValueError(f"Translation failed: {str(e)}") from e
 
 @st.cache_data
-def read_pdf(uploaded_files, chunk_size=250, chunk_overlap=20):
+def read_pdf(uploaded_files, chunk_size=600, chunk_overlap=60):
     translated_docs = []
 
     for uploaded_file in uploaded_files:
@@ -193,9 +194,21 @@ if user_question := st.text_input(
     print(docs)
     print("*"*5)
     model_llm = LangChainInterface(model=ModelTypes.LLAMA_2_70B_CHAT.value, credentials=creds, params=params, project_id=project_id)
-    chain = load_qa_chain(model_llm, chain_type="stuff")
+    # chain = load_qa_chain(model_llm, chain_type="stuff")
 
-    response = chain.run(input_documents=docs, question=translated_user_input)
+    # response = chain.run(input_documents=docs, question=translated_user_input)
+
+    
+
+    knowledge_based_template = (
+        open("assets/llama2-prompt-template-rag.txt", encoding="utf8").read().format(
+        )
+    )
+
+    custom_prompt = PromptTemplate(template=knowledge_based_template, input_variables=["context", "question"])
+
+    response = model_llm(custom_prompt.format(question=translated_user_input, context=docs))
+
     translated_response = translate_to_thai(response, True)
 
     st.text_area(label="Model Response", value=translated_response, height=100)
