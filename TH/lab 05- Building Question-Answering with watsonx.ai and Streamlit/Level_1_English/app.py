@@ -46,7 +46,8 @@ models = {
     "llama2": "meta-llama/llama-2-70b-chat"
 }
 # define LangChainInterface model
-llm = LangChainInterface(model=models["granite_chat"], credentials=creds, params=params, project_id=project_id)
+# llm = LangChainInterface(model=models["granite_chat"], credentials=creds, params=params, project_id=project_id)
+llm = LangChainInterface(model=models["llama2"], credentials=creds, params=params, project_id=project_id)
 
 # Title for the app
 st.title('🤖 Our First Q&A Front End')
@@ -58,3 +59,8 @@ if prompt:
     response = llm(prompt)
     # Write the output to the screen
     st.write(response)
+
+'''
+Room of Improvement:
+Llama 2 70B - requires prompt template for better understandings of Thai language
+'''
